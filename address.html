@@ -1,0 +1,306 @@
+<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <style>
+html, body {
+    width: 98%;
+    height: 100%;
+    background-color: #CCB;
+    margin: 0 auto;
+}
+table {
+    background-color: #FFF;
+    border-style: solid;
+    margin: 0 auto;
+    padding: 2px;
+}
+
+#results {
+    padding: 0.5em;
+    border-style: inset;
+    background-color: #CCB;
+    margin: 0 auto;
+    text-align: center;
+}
+
+span {
+    padding: 0.5em;
+}
+
+
+.numberField {
+    width: 4em;
+}
+.smallField, .largeField, .medField {
+    width: 100%;
+}
+
+ #map {
+        border-style: solid;
+        height: 44%;
+        width: 99%;
+      }
+      
+#controls {
+  overflow-y: scroll;
+  padding: 0.1em;
+  height: 52%;
+  width: 99%;
+  border-style: solid;
+}
+
+.note {
+    font-size: small;
+    font-style: italic;
+}
+h4 {
+    padding: 0em;
+    margin: 0 auto;
+    text-align: center;
+}
+    </style>
+    <!-- jQuery 2.x -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+</head>
+<body>
+
+
+    <div id="controls">
+        
+    <form id="theForm" onsubmit="return false;">
+   
+    <div id="autocompleteWrapper">
+        <label for="autocomplete"><b>Required:</b>&nbsp;Search for Customer Address </label>
+        <input type="text" id="autocomplete" name="user_address_input" style="width: 100%">
+        <p style="font-size: small">Note: in the future, Customer or Business Name may be able to auto-fill everything except BULK/EXCHANGE, and Parent Company</p>
+    </div>
+    </tr>
+    </table>
+    <div id="results" style="">
+        <!-- ReSULTS TABLE -->
+        <table>
+            <tr>
+                <td><!-- road -->
+                <span>
+                    <label for="street_number">Street Address</label>
+                </span>
+                </td><td>
+                <span>
+                    <input disabled="" type="text" class="numberField" id="street_number" name="street_number"/>
+                </span>
+            <!-- --></td><td colspan="2">
+                <span>
+                    <input disabled="" type="text" class="largeField" id="route" name="route"/>
+                </span>
+            </td>
+        </tr>
+        <tr>
+        <tr><!-- city, state, zip -->
+        <td colspan="2">
+            <span >
+                <label for="locality">City</label>
+                <input disabled="" type="text" class="medField" id="locality" name="locality">
+            </span>
+        </td><td>
+            <span>
+                <label for="administrative_area_level_1">State</label>
+                <input disabled="" type="text" class="smallField" id="administrative_area_level_1" name="administrative_area_level_1">
+            </span>
+        </td><td>
+            <span>
+                <label for="postal_code">Zip Code</label>
+                <input disabled="" type="text" class="medField" id="postal_code" name="postal_code">
+            </span>
+        </td>
+        </tr><tr>
+        <td colspan="2">
+        <!-- county; lat, lng from geometry-->
+            <span>
+               <label for="administrative_area_level_2">County</label>
+                <input disabled="" type="text" class="medField" id="administrative_area_level_2" name="administrative_area_level_2">
+            </span>
+        </td><td>
+            <span>
+                <label for="location_lat">Lat</label>
+                <input disabled="" type="text" class="smallField" id="location_lat" name="location_lat">
+            </span>
+        </td><td>
+            <span>
+                <label for="location_lng">Lng</label>
+                <input disabled="" type="text" class="smallField" id="location_lng" name="location_lng">
+            </span>
+        </td>
+        </tr>
+    </table>
+         </div><!-- end results div -->
+
+    </form><!-- end customer info -->
+    </div><!-- end customer info -->
+    <div id="map">
+        
+    </div>
+<script>
+/* Design
+
+
+
+ 
+ 
+ 
+ */
+      // This example displays an address form, using the autocomplete feature
+      // of the Google Places API to help users fill in the information.
+
+      // This example requires the Places library. Include the libraries=places
+      // parameter when you first load the API. For example:
+      // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
+
+      // AC
+      var placeSearch, autocomplete;
+      
+      // MAP
+      var mapObj, markersArray = [];
+        var customerIcon = 'https://chart.googleapis.com/chart?' +
+      'chst=d_map_pin_letter&chld=C|FF0000|000000';
+      // change to make default map start location
+      var geolocateUserIsOn = true;
+      
+      var componentForm = {
+        street_number: 'short_name',
+        route: 'long_name',
+        locality: 'long_name',
+        administrative_area_level_1: 'short_name',
+        administrative_area_level_2: 'short_name',
+        // country: 'long_name',
+        postal_code: 'short_name'
+      };
+
+      function initAutocomplete() {
+        // Create the autocomplete object, restricting the search to geographical
+        // location types.
+        autocomplete = new google.maps.places.Autocomplete(
+            /** @type {!HTMLInputElement} */(document.getElementById('autocomplete'))
+            ,{types: ['address']}
+            );
+
+        // When the user selects an address from the dropdown, populate the address
+        // fields in the form.
+        autocomplete.addListener('place_changed', fillInAddress);
+        
+        if (!mapObj) {
+            console.log("No map object, creating at default lat lng");
+            initMap();
+        } 
+      }
+
+      // give it a place.geometry.location
+      // TODO: Also accept lat long
+      function doMarker(location) {
+         markersArray.push(new google.maps.Marker({
+              map: mapObj,
+              position: location,
+              icon: customerIcon
+            }));
+      }
+      function fillInAddress() {
+        // Get the place details from the autocomplete object.
+        var place = autocomplete.getPlace();
+
+        for (var component in componentForm) {
+          document.getElementById(component).value = '';
+          document.getElementById(component).disabled = false;
+        }
+
+        // Get each component of the address from the place details
+        // and fill the corresponding field on the form.
+        for (var i = 0; i < place.address_components.length; i++) {
+          
+          // LOG  
+          console.log(place.address_components[i].types[0] + " = "
+                        + place.address_components[i]["short_name"]);
+          
+          var addressType = place.address_components[i].types[0];
+          if (componentForm[addressType]) {
+            var val = place.address_components[i][componentForm[addressType]];
+            document.getElementById(addressType).value = val;
+          }
+        }
+        var lat, lng;
+        lat = place.geometry.location.lat();
+        lng = place.geometry.location.lng();
+        // center the map onto the new place
+        mapObj.setCenter(new google.maps.LatLng(lat,lng));
+        
+        doMarker(place.geometry.location);
+
+        document.getElementById("location_lat").value = lat;
+        document.getElementById("location_lat").disabled = true;
+        document.getElementById("location_lng").value = lng;
+        document.getElementById("location_lng").disabled = true;
+        
+        console.log($("#theForm").serialize());
+        
+      }
+
+      // Bias the autocomplete object to the user's geographical location,
+      // as supplied by the browser's 'navigator.geolocation' object.
+      function geolocateUserBrowser() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var geolocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            var circle = new google.maps.Circle({
+              center: geolocation,
+              radius: position.coords.accuracy
+            });
+            autocomplete.setBounds(circle.getBounds());
+          });
+        }
+        
+       
+      }
+      
+      // Map Object
+      // Create map Object
+      function createMapObject(args) {
+        var thelat, thelon;
+        
+        if ( args["lat"]) {
+            thelat = args["lat"];
+        } else {
+       
+            thelat = 55.53;
+        }
+        if ( args["lon"]) {
+            thelon = args["lon"];
+        } else {
+            thelon = 9.4;
+        }
+       var map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: thelat, lng: thelon},
+            zoom: 10
+            , streetViewControl: false
+          });
+       return map;
+      }
+      
+      function initMap(args) {
+        var d = {};
+        if (!args) {
+            d["lat"] = 39.6638;
+            d["lon"] = -75.0775;
+        } else {
+            d = args;
+        }
+        mapObj = createMapObject(d);
+        console.log("Created map object.");
+        
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;callback=initAutocomplete" async="" defer=""></script>
+  
+
+</body>
