@@ -159,7 +159,8 @@ function initAutocomplete() {
             administrative_area_level_1: 'short_name',
             administrative_area_level_2: 'short_name',
             // country: 'long_name',
-            postal_code: 'short_name'
+            postal_code: 'short_name',
+            formatted_address : 'long_name'
           };
         // Get the place details from the autocomplete object.
         // var place = autocomplete.getPlace();
@@ -175,11 +176,18 @@ function initAutocomplete() {
           // LOG  
           console.log(place.address_components[i].types[0] + " = "
                         + place.address_components[i]["short_name"]);
-          
+          // addressType here corresponds to the keys in componentForm
           var addressType = place.address_components[i].types[0];
           if (componentForm[addressType]) {
             var val = place.address_components[i][componentForm[addressType]];
-            document.getElementById(addressType).value = val;
+            // TODO: Either include in prereqs, or find children of #theForm properly
+            var elem = document.getElementById(addressType);
+            // if we can find the id in the form, set its value
+            if (typeof elem != 'undefined'){
+                elem.value = val;
+            } else {
+                console.log("no id in the document for " + addressType);
+            }
           }
         }
         var lat, lng;
