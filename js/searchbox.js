@@ -160,7 +160,6 @@ function initAutocomplete() {
             administrative_area_level_2: 'short_name',
             // country: 'long_name',
             postal_code: 'short_name',
-            formatted_address : 'long_name'
           };
         // Get the place details from the autocomplete object.
         // var place = autocomplete.getPlace();
@@ -190,6 +189,20 @@ function initAutocomplete() {
             }
           }
         }
+        // formatted address
+        var formatted = place.formatted_address;
+        var elem = document.getElementById("formatted_address");
+        if (typeof elem != 'undefined') {
+            elem.value = formatted;
+        }
+        // phone
+        var phone = place.formatted_phone_number;
+        elem = document.getElementById("formatted_phone_number");
+        if (typeof elem != 'undefined') {
+            elem.value = phone;
+        }
+        
+        // GPS lat lon
         var lat, lng;
         lat = place.geometry.location.lat();
         lng = place.geometry.location.lng();
