@@ -1,9 +1,131 @@
 <html>
-    <body>
-        TODO: Bootstrap
-        Map up here
-        <div id="map"></div>
-        <br>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Places Searchbox</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 55%;
+      }
+      .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      .pac-container {
+        font-family: Roboto;
+      }
+
+      #type-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        padding: 5px 11px 0px 11px;
+      }
+
+      #type-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+      #target {
+        width: 345px;
+      }
+      .largeField {
+        width: 85%;
+      }
+      table {
+        width: 85%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="text-center">
+        <span>JSON:</span>
+        <span id="json">click JSON button to see JSON</span>
+        <select>
+            <option>Customer #1</option>
+        </select>
+        <button onclick="goJSON(); return false;">JSON</button>
+    </div>
+    <div>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
+    <br>
+    <form id="theForm" onsubmit="return false;">
+    <table>
+        <table>
+            <tr>
+                <td colspan="2"><!-- road -->
+                <span>
+                    <label for="formatted_address">Postal Address</label>
+                </span>
+                <input  disabled="" type="text" class="largeField" id="formatted_address" name="formatted_address">
+                </td>
+            </tr>
+            <tr>
+                <td>
+            <span>
+                <label for="location_lat">Lat</label>
+                <input disabled="" type="text" class="smallField" id="location_lat" name="location_lat">
+            </span>
+        </td><td>
+            <span>
+                <label for="location_lng">Lng</label>
+                <input disabled="" type="text" class="smallField" id="location_lng" name="location_lng">
+            </span>
+        </td>
+        </tr>
+        <tr>
+        <td colspan="2">
+            <span>
+            <label for="cage_number">Cage Number</label>
+            <input enabled="" type="number" class="smallField" id="cage_number" name="cage_number">
+            </span> 
+        </td>
+            
+        </tr>
+    </table>
+         
+    </form>
+    </div><!-- end results div -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://rawgit.com/rickpage/addressForm/master/js/searchbox.js"></script>
+
+    <script>
+        function goJSON(args) {  var j = $("#theForm").serialize();$("#json").text(j);}
+    </script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWNNCsmSfb0gpZv3IuK1c91cctc2y6FYY&libraries=places&amp;callback=initAutocomplete"
+         async defer></script>
+        
+        
+        
         <select><option>Select a Customer</option></select> and Cage Number: <input><br>
         <i>This can be auto-populated for a view like /customer/12/location/<br>
         Notice this is not the "/api/customer"<br></i>

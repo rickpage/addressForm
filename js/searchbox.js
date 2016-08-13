@@ -163,9 +163,13 @@ function initAutocomplete() {
           };
         // Get the place details from the autocomplete object.
         // var place = autocomplete.getPlace();
+        var e;
         for (var component in componentForm) {
-          document.getElementById(component).value = '';
-          document.getElementById(component).disabled = false;
+          e = document.getElementById(component)
+          if ( e != null){
+             e.value = '';
+             e.disabled = false;
+          }
         }
 
         // Get each component of the address from the place details
