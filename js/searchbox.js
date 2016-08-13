@@ -184,10 +184,10 @@ function initAutocomplete() {
           if (componentForm[addressType]) {
             var val = place.address_components[i][componentForm[addressType]];
             // TODO: Either include in prereqs, or find children of #theForm properly
-            var elem = document.getElementById(addressType);
+            e = document.getElementById(addressType);
             // if we can find the id in the form, set its value
-            if (typeof elem != 'undefined'){
-                elem.value = val;
+            if ( e != null){
+                e.value = val;
             } else {
                 console.log("no id in the document for " + addressType);
             }
@@ -195,15 +195,15 @@ function initAutocomplete() {
         }
         // formatted address
         var formatted = place.formatted_address;
-        var elem = document.getElementById("formatted_address");
-        if (typeof elem != 'undefined') {
-            elem.value = formatted;
+        e = document.getElementById("formatted_address");
+        if (e != null) {
+            e.value = formatted;
         }
         // phone
         var phone = place.formatted_phone_number;
-        elem = document.getElementById("formatted_phone_number");
-        if (typeof elem != 'undefined') {
-            elem.value = phone;
+        e = document.getElementById("formatted_phone_number");
+        if (e != null) {
+            e.value = phone;
         }
         
         // GPS lat lon
@@ -215,10 +215,8 @@ function initAutocomplete() {
         document.getElementById("location_lat").disabled = true;
         document.getElementById("location_lng").value = lng;
         document.getElementById("location_lng").disabled = true;
-        var j = $("#theForm").serialize()
-
+        var j = $("#theForm").serialize();
         console.log(j);
-        
     }
       
       
