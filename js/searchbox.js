@@ -1,4 +1,4 @@
-/*
+     /*
  * Searchbox functionality
  * Usage:
  * call initAutocomplete from google api link i.e.
@@ -11,7 +11,7 @@
         Also need elements with the following ids (optional)
  * TODO
  */
-var formValues = {};
+var addressData = {};
 function initAutocomplete() {
         var map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: -33.8688, lng: 151.2195},
@@ -148,13 +148,11 @@ function initAutocomplete() {
        map.setOptions({styles: remove_poi})
       }
 
-      /*
-       * Take place details and fill in the form
-       * elements with the values
-       */
-      function fillInAddress(place,status) {
-        // These correspond to element ids in the form
-        var componentForm = {
+      function storeAddressData(place) {
+        // TODO: Rename to Address Details = {} or similar
+        addressData = {};
+        // These correspond address components that require short or long key for values
+        var addressComponentKeys = {
             street_number: 'short_name',
             route: 'long_name',
             locality: 'long_name',
@@ -163,18 +161,8 @@ function initAutocomplete() {
             // country: 'long_name',
             postal_code: 'short_name',
           };
-        // Get the place details from the autocomplete object.
-        // var place = autocomplete.getPlace();
-        var e;
-        for (var component in componentForm) {
-          e = document.getElementById(component)
-          if ( e != null){
-             e.value = '';
-             e.disabled = false;
-          }
-        }
-
-        // Get each component of the address from the place details
+          
+          // Get each component of the address from the place details
         // and fill the corresponding field on the form.
         for (var i = 0; i < place.address_components.length; i++) {
           
@@ -183,59 +171,63 @@ function initAutocomplete() {
                         + place.address_components[i]["short_name"]);
           // addressType here corresponds to the keys in componentForm
           var addressType = place.address_components[i].types[0];
-          if (componentForm[addressType]) {
-            var val = place.address_components[i][componentForm[addressType]];
-            // TODO: Either include in prereqs, or find children of #theForm properly
-            e = document.getElementById(addressType);
-            // if we can find the id in the form, set its value
-            if ( e != null){
-                e.value = val;
-            } else {
-                console.log("no id in the document for " + addressType);
-            }
+          if (addressComponentKeys[addressType]) {
+            var val = place.address_components[i][addressComponentKeys[addressType]];
+            // store
+            addressData[addressType] = val;
           }
         }
-        // formatted address
+         // formatted address
         var formatted = place.formatted_address;
-        e = document.getElementById("formatted_address");
-        if (e != null) {
-            e.value = formatted;
-        }
+        addressData['formatted_address'] = formatted;
+        
         // phone
         var phone = place.formatted_phone_number;
-        e = document.getElementById("formatted_phone_number");
-        if (e != null) {
-            e.value = phone;
-        }
+        addressData['formatted_phone_number'] = phone;
         // info url
         var url = place.url;
-        console.log(url)
-        e = document.getElementById("info_url");
-        if (e != null) {
-            e.text = "Click for more info";
-            e.href = url;
-        }
-        
+        addressData['link'] = "<a href=\""+url+"\" >More Info</a>";
         // GPS lat lon
         var lat, lng;
         lat = place.geometry.location.lat();
         lng = place.geometry.location.lng();
 
-        // todo: if we use serialize, we can't disable
-        //  instead, add an edit handler.
-        e = document.getElementById("location_lat");
-        if (e != null){
-                e.value = lat;
+        addressData['lat'] = lat;
+        addressData['lng'] = lng;
+        
+        for (var i in addressData){
+          console.log(i + " : " + addressData[i])
         }
-        e = document.getElementById("location_lng");
-        if (e != null){
-                e.value = lat;
+        
+      }
+      /*
+       * Take place details and fill in the form
+       * elements with the values
+       */
+      function fillInAddress(place,status) {
+        var e = null;
+        var mapping = {
+          "lat" : "location_lat"
+          , "lng" : "location_lng"
+          , 
         }
-        //document.getElementById("location_lat").disabled = true;
-        //document.getElementById("location_lng").disabled = true;
-        var j = $("#theForm").serialize();
-        console.log(j);
-        formValues = j;
+        var mapvalue= null;
+        // TODO: if bad status, show error
+        for ( var i in addressData ){
+          // get mapping if any
+          mapvalue = mapping[i];
+          if (mapvalue == null) {
+            mapvalue = i;
+          }
+          e = document.getElementById(mapvalue);
+          if ( e != null) {
+            if (e.tagName.toLowerCase() == "input") {
+                e.value = addressData[i];
+            } else {
+              e.innerHTML = addressData[i];
+            }
+          } 
+        }
     }
       
       
@@ -255,6 +247,7 @@ function initAutocomplete() {
             placeId: p.place_id
           }, function(place, status) {
               if (status === google.maps.places.PlacesServiceStatus.OK) {
+                  storeAddressData(place)
                   callback(place)
               } else {
                 // TODO: Warn user no address available for that option
@@ -269,6 +262,7 @@ function initAutocomplete() {
           });
         } else {
             // we already have the details we want, so go ahead
+            storeAddressData(p)
             callback(p);
        }
     }
@@ -282,6 +276,7 @@ function initAutocomplete() {
         }
     }
     
-    function getFormData() {
-        return formValues;
+    function getAddressData() {
+        return addressData;
     }
+      
