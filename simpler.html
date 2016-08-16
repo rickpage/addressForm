@@ -1,7 +1,19 @@
 <html>
   <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    
+    {% block bootstrap_head %}
+   
+    <!-- Latest compiled and minified CSS -->
+    <!-- <link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+    integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+          crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="http://bootswatch.com/flatly/bootstrap.min.css" type="text/css">
+    
     <title>Places Searchbox</title>
     <style>
       html, body {
@@ -11,6 +23,7 @@
       }
       #map {
         height: 55%;
+        margin: 2em;
       }
       .controls {
         margin-top: 10px;
@@ -65,9 +78,9 @@
     </style>
   </head>
   <body>
-    <div class="text-center">
+    <div >
         <span>JSON:</span>
-        <span id="json">click JSON button to see JSON</span>
+        <div id="json">click JSON button to see JSON</div>
         <select>
             <option>Customer #1</option>
         </select>
@@ -77,36 +90,50 @@
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
     <div id="map"></div>
     <br>
-    <form id="theForm" onsubmit="return false;">
-    <table>
-        <table>
-            <tr>
-                <td colspan="2"><!-- road -->
-                <span>
-                    <label for="formatted_address">Postal Address</label>
-                </span>
-                <input  disabled="" type="text" class="largeField" id="formatted_address" name="formatted_address">
-                </td>
-            </tr>
-            <tr>
-                <td>
-            <span>
-                <label for="location_lat">Lat</label>
-                <input disabled="" type="text" class="smallField" id="location_lat" name="location_lat">
+    <form id="theForm" class="form-horizontal"  onsubmit="return false;">
+    <table >
+        <tr>
+            <td colspan="2"><!-- address -->
+            <span >
+                <label for="formatted_address">Postal Address</label>
             </span>
-        </td><td>
-            <span>
-                <label for="location_lng">Lng</label>
-                <input disabled="" type="text" class="smallField" id="location_lng" name="location_lng">
-            </span>
-        </td>
+            <input   type="text"  class="form-control" id="formatted_address" name="formatted_address">
+            </td>
         </tr>
         <tr>
-        <td colspan="2">
+            <!-- phone -->
+            <td>
             <span>
-            <label for="cage_number">Cage Number</label>
-            <input enabled="" type="number" class="smallField" id="cage_number" name="cage_number">
-            </span> 
+                <label for="formatted_phone_number">Phone Number</label>
+            </span>
+            <input   type="phone" class="form-control" id="formatted_phone_number" name="formatted_phone_number">
+            </td><td>
+            <!-- <span>
+                <label for="info_url">URL</label>
+            </span> -->
+            <a href="#" id="info_url" name="info_url"></a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+            <div>
+                <label for="location_lat">Lat</label>
+                <input  type="text" class="form-control" id="location_lat" name="location_lat">
+            </div>
+        </td><td>
+            <div>
+                <label for="location_lng">Lng</label>
+                <input  type="text" class="form-control" id="location_lng" name="location_lng">
+            </div>
+        </td>
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr>
+        <td colspan="2">
+            <div class="well well-large text-center">
+                <label for="cage_number">Cage Number</label>
+                <input  type="number" class="form-control" id="cage_number" name="cage_number">
+            </div> 
         </td>
             
         </tr>
@@ -116,25 +143,304 @@
     </div><!-- end results div -->
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://rawgit.com/rickpage/addressForm/master/js/searchbox.js"></script>
-
+    <!--<script src="https://rawgit.com/rickpage/addressForm/master/js/searchbox.js"></script>
+-->
     <script>
-        function goJSON(args) {  var j = $("#theForm").serialize();$("#json").text(j);}
+/*
+ * Searchbox functionality
+ * Usage:
+ * call initAutocomplete from google api link i.e.
+ * <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWNNCsmSfb0gpZv3IuK1c91cctc2y6FYY&libraries=places&amp;callback=initAutocomplete"
+         async defer
+ * Pre-requisites:
+ *          
+        form id="theForm" onsubmit="return false;"
+        
+        Also need elements with the following ids (optional)
+ * TODO
+ */
+var formValues = {};
+function initAutocomplete(args) {
+    var lat, lon;
+    if (args == null || typeof args == 'undefined') {
+        lat = -33.8688; lon = 151.2195;
+    }
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: lat, lng: lon},
+          zoom: 13,
+          mapTypeId: 'roadmap'
+          , types: 'establishment'
+        });
+
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('pac-input');
+        var searchBox = new google.maps.places.SearchBox(input);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+        // PlacesService for place details
+        var service = new google.maps.places.PlacesService(map);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
+
+        var markers = [];
+        // handler user select
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          } else {
+            console.log("Processing " + places.length + " # of places");
+          }
+          // Only one result? Great, populate now
+          if (places.length == 1) {
+            // TODO: Could be an ATM, need consistent filtering
+            // use fetch, gets more info only if needed
+            fetchPlaceAddress(places[0], service, fillInAddress);
+          }
+          
+          // Clear out the old markers.
+          markers.forEach(function(marker) {
+            marker.setMap(null);
+          });
+          markers = [];
+
+          // update the bounds as results come in
+          // TODO: Don't do this when we ignore results, otherwise
+          // our old bounds will be reset when we should instead warn of no
+          // results
+          var bounds = new google.maps.LatLngBounds();
+          
+          // For each place, get the icon, name and location.
+          places.forEach(function(place) {
+            if (!place.geometry) {
+                var n;
+                if (!place.name) {
+                    n = "(Un-named place)";
+                } else {
+                    n = place.name;
+                }
+              console.log(n + " contains no geometry");
+              return;
+            }
+            // TODO: Filter out un-used places
+            var x = -1;
+            // ignore a certain type of result
+            //if (place.types) {
+            //    var type = 'atm';
+            //    x = place.types.indexOf(type)
+            //    console.log(type + ' place' + place.name + ' found at index ' + x)
+            //}
+            
+            if (true){ //TODO: filering if(x != 0 ){
+                
+                var icon = {
+                  url: place.icon,
+                  size: new google.maps.Size(34, 34),
+                  origin: new google.maps.Point(0, 0),
+                  anchor: new google.maps.Point(17, 34),
+                  scaledSize: new google.maps.Size(25, 25)
+                };
+    
+                // Create a marker for each place.
+                var marker = new google.maps.Marker({
+                  map: map,
+                  icon: icon,
+                  title: place.name,
+                  position: place.geometry.location
+                });
+                markers.push(marker);
+                var p = place;
+                marker.addListener('click', clickHandlerForPlace(p, service, fillInAddress));
+                
+                // calculate new view bounds
+                if (place.geometry.viewport) {
+                  // Only geocodes have viewport.
+                  bounds.union(place.geometry.viewport);
+                } else {
+                  bounds.extend(place.geometry.location);
+                }
+            } // end if for filtering
+          });
+          
+          // set view bounds
+          map.fitBounds(bounds);
+        }); // end handler
+        
+        // don't show icons unless we place them
+        // but show roads and administrative labels
+        var remove_poi = [
+         {
+           "featureType": "all",
+           "elementType": "labels",
+           "stylers": [
+             { "visibility": "off" }
+           ]
+         },
+          {
+           "featureType": "road",
+           "elementType": "labels",
+           "stylers": [
+             { "visibility": "on" }
+           ]
+         },
+          {
+           "featureType": "administrative",
+           "elementType": "labels",
+           "stylers": [
+             { "visibility": "on" }
+           ]
+         }
+       ]
+       map.setOptions({styles: remove_poi})
+      }
+
+      /*
+       * Take place details and fill in the form
+       * elements with the values
+       */
+      function fillInAddress(place,status) {
+        // These correspond to element ids in the form
+        var componentForm = {
+            street_number: 'short_name',
+            route: 'long_name',
+            locality: 'long_name',
+            administrative_area_level_1: 'short_name',
+            administrative_area_level_2: 'short_name',
+            // country: 'long_name',
+            postal_code: 'short_name',
+          };
+        // Get the place details from the autocomplete object.
+        // var place = autocomplete.getPlace();
+        var e;
+        for (var component in componentForm) {
+          e = document.getElementById(component)
+          if ( e != null){
+             e.value = '';
+             e.disabled = false;
+          }
+        }
+
+        // Get each component of the address from the place details
+        // and fill the corresponding field on the form.
+        for (var i = 0; i < place.address_components.length; i++) {
+          
+          // LOG  
+          console.log(place.address_components[i].types[0] + " = "
+                        + place.address_components[i]["short_name"]);
+          // addressType here corresponds to the keys in componentForm
+          var addressType = place.address_components[i].types[0];
+          if (componentForm[addressType]) {
+            var val = place.address_components[i][componentForm[addressType]];
+            // TODO: Either include in prereqs, or find children of #theForm properly
+            e = document.getElementById(addressType);
+            // if we can find the id in the form, set its value
+            if ( e != null){
+                e.value = val;
+            } else {
+                console.log("no id in the document for " + addressType);
+            }
+          }
+        }
+        // formatted address
+        var formatted = place.formatted_address;
+        e = document.getElementById("formatted_address");
+        if (e != null) {
+            e.value = formatted;
+        }
+        // phone
+        var phone = place.formatted_phone_number;
+        e = document.getElementById("formatted_phone_number");
+        if (e != null) {
+            e.value = phone;
+        }
+        // info url
+        var url = place.url;
+        console.log(url)
+        e = document.getElementById("info_url");
+        if (e != null) {
+            e.text = "Click for more info";
+            e.href = url;
+        }
+        
+        // GPS lat lon
+        var lat, lng;
+        lat = place.geometry.location.lat();
+        lng = place.geometry.location.lng();
+
+        // todo: if we use serialize, we can't disable
+        //  instead, add an edit handler.
+        e = document.getElementById("location_lat");
+        if (e != null){
+                e.value = lat;
+        }
+        e = document.getElementById("location_lng");
+        if (e != null){
+                e.value = lat;
+        }
+        //document.getElementById("location_lat").disabled = true;
+        //document.getElementById("location_lng").disabled = true;
+        var j = $("#theForm").serialize();
+        console.log(j);
+        formValues = j;
+    }
+      
+      
+    /*
+     * Fetch place details and execute callback
+     */
+    function  fetchPlaceAddress(p, service, callback){
+        // DEBUG: checking out what types we get back..
+        var s = p.name;
+        for (var i in p.types) {
+         s += ": " + p.types[i];
+        }
+        console.log(s);
+        if (!p.address_components) {
+          console.log("Fetching details...");
+          service.getDetails({
+            placeId: p.place_id
+          }, function(place, status) {
+              if (status === google.maps.places.PlacesServiceStatus.OK) {
+                  callback(place)
+              } else {
+                // TODO: Warn user no address available for that option
+                var place_name;
+                if (!place.name) {
+                    place_name = "(undefined)";
+                } else {
+                    place_name = place.name;
+                }
+                console.log("Place details not found!" + place_name)
+              }
+          });
+        } else {
+            // we already have the details we want, so go ahead
+            callback(p);
+       }
+    }
+    /*
+     * Returns a click event handler for use with
+     * fetching place details
+     */
+    function clickHandlerForPlace(p, service, callback){
+        return function(event) {
+            fetchPlaceAddress(p, service, callback);      
+        }
+    }
+    
+    function getFormData() {
+        return formValues;
+    }
     </script>
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWNNCsmSfb0gpZv3IuK1c91cctc2y6FYY&libraries=places&amp;callback=initAutocomplete"
-         async defer></script>
-        
-        
-        
-        <select><option>Select a Customer</option></select> and Cage Number: <input><br>
-        <i>This can be auto-populated for a view like /customer/12/location/<br>
-        Notice this is not the "/api/customer"<br></i>
-        Type in address here<input><br>
-        When selected, fills in formatted address, and phone.<input disabled=""><br>
-        Have <a href="#">link</a>to details (open in new window)<br>
-         
-        <button>Add Location</button>
-       <br> 
-        TODO: The JS for picking Places data from the map, and the gathering form data
+    <script>
+        function goJSON(args) {  $("#json").text(getFormData());}
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWNNCsmSfb0gpZv3IuK1c91cctc2y6FYY&libraries=places&amp;callback=initAutocomplete"
+     async defer></script>
     </body>
 </html>

@@ -3,13 +3,15 @@
  * Usage:
  * call initAutocomplete from google api link i.e.
  * <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWNNCsmSfb0gpZv3IuK1c91cctc2y6FYY&libraries=places&amp;callback=initAutocomplete"
-         async defer></script>
+         async defer
  * Pre-requisites:
  *          
-        </pre>
-        <form id="theForm" onsubmit="return false;">
+        form id="theForm" onsubmit="return false;"
+        
+        Also need elements with the following ids (optional)
  * TODO
  */
+var formValues = {};
 function initAutocomplete() {
         var map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: -33.8688, lng: 151.2195},
@@ -205,18 +207,35 @@ function initAutocomplete() {
         if (e != null) {
             e.value = phone;
         }
+        // info url
+        var url = place.url;
+        console.log(url)
+        e = document.getElementById("info_url");
+        if (e != null) {
+            e.text = "Click for more info";
+            e.href = url;
+        }
         
         // GPS lat lon
         var lat, lng;
         lat = place.geometry.location.lat();
         lng = place.geometry.location.lng();
 
-        document.getElementById("location_lat").value = lat;
-        document.getElementById("location_lat").disabled = true;
-        document.getElementById("location_lng").value = lng;
-        document.getElementById("location_lng").disabled = true;
+        // todo: if we use serialize, we can't disable
+        //  instead, add an edit handler.
+        e = document.getElementById("location_lat");
+        if (e != null){
+                e.value = lat;
+        }
+        e = document.getElementById("location_lng");
+        if (e != null){
+                e.value = lat;
+        }
+        //document.getElementById("location_lat").disabled = true;
+        //document.getElementById("location_lng").disabled = true;
         var j = $("#theForm").serialize();
         console.log(j);
+        formValues = j;
     }
       
       
@@ -261,4 +280,8 @@ function initAutocomplete() {
         return function(event) {
             fetchPlaceAddress(p, service, callback);      
         }
+    }
+    
+    function getFormData() {
+        return formValues;
     }
