@@ -1,4 +1,4 @@
-    /*
+/*
  * Searchbox functionality
  * Usage:
  * call initAutocomplete from google api link i.e.
@@ -12,13 +12,43 @@
  * TODO
  */
 var addressData = {};
-function initAutocomplete() {
+var _defaultLatLon = {lat: -33.8688, lng: 151.2195};
+
+/**
+ * args['lat'],args['lng'] - lat lon to center map on
+ * args['callback'] the call back passed in
+ */
+function initializeSearchbox(args) {
+        var lat=_defaultLatLon.lat
+        ,lng=_defaultLatLon.lng
+        ,callback=fillInAddress;
+        if (args !== undefined) {
+
+          if ( "lng" in args) {
+              lng = args['lng'];
+          }
+          if ("lat" in args) {
+              lat = args['lat'];
+          }
+          
+          if ("callback" in args) {
+            callback = args["callback"];
+          }
+        }
+        
         var map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: -33.8688, lng: 151.2195},
+          center: {lat: lat, lng: lng},
           zoom: 13,
           mapTypeId: 'roadmap'
           , types: 'establishment'
         });
+        
+        init(map, callback);
+}
+
+
+function init(map, callback) {
+        
 
         // Create the search box and link it to the UI element.
         var input = document.getElementById('pac-input');
@@ -48,7 +78,7 @@ function initAutocomplete() {
           if (places.length == 1) {
             // TODO: Could be an ATM, need consistent filtering
             // use fetch, gets more info only if needed
-            fetchPlaceAddress(places[0], service, fillInAddress);
+            fetchPlaceAddress(places[0], service, callback);
           }
           
           // Clear out the old markers.
@@ -104,7 +134,7 @@ function initAutocomplete() {
                 });
                 markers.push(marker);
                 var p = place;
-                marker.addListener('click', clickHandlerForPlace(p, service, fillInAddress));
+                marker.addListener('click', clickHandlerForPlace(p, service, callback));
                 
                 // calculate new view bounds
                 if (place.geometry.viewport) {
@@ -233,6 +263,10 @@ function initAutocomplete() {
       
     /*
      * Fetch place details and execute callback
+     * using the places API service
+     * p - place with or without address components
+     * service - places API
+     * callback - after storing info, do what user wants
      */
     function  fetchPlaceAddress(p, service, callback){
         // DEBUG: checking out what types we get back..
@@ -268,7 +302,8 @@ function initAutocomplete() {
     }
     /*
      * Returns a click event handler for use with
-     * fetching place details
+     * fetching place details - fetches when clicked,
+     * and then fetch place calls the callback
      */
     function clickHandlerForPlace(p, service, callback){
         return function(event) {
@@ -276,10 +311,35 @@ function initAutocomplete() {
         }
     }
     
-    function getAddressData() {
-        return addressData;
+    /**
+     * Returns JSON dict of address data.
+     * Possible fields are:
+     * TODO
+     * args - Optional list or string corresponding
+     * to the desired key value pairs
+     * i.e. ["formatted_address","formatted_phone_number"]
+     * if you don't want any other info
+     * Otherwise the dict will have all available
+     * place/address fields
+     * recorded in addressData
+     */
+    function getAddressData(args) {
+        if (args == null) {
+          return addressData;
+        } else {
+          var d = {}; 
+          if (typeof args == 'string') {
+            d[args] = addressData[args];
+          }
+          else if (typeof args == 'list') {
+            for (var i in args){
+                d[i] = addressData[i];
+            }
+          }
+          return d;
+        }
     }
-      
-    function clearAddressFormData(){
+
+    function clearAddressData(){
         addressData = {};    
     }

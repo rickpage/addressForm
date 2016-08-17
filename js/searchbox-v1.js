@@ -1,148 +1,4 @@
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    
-    {% block bootstrap_head %}
-   
-    <!-- Latest compiled and minified CSS -->
-    <!-- <link rel="stylesheet"
-    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
-    integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
-          crossorigin="anonymous"> -->
-    <link rel="stylesheet" href="http://bootswatch.com/flatly/bootstrap.min.css" type="text/css">
-    
-    <title>Places Searchbox</title>
-    <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      #map {
-        height: 55%;
-        margin: 2em;
-      }
-      .controls {
-        margin-top: 10px;
-        border: 1px solid transparent;
-        border-radius: 2px 0 0 2px;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        height: 32px;
-        outline: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      }
-
-      #pac-input {
-        background-color: #fff;
-        font-family: Roboto;
-        font-size: 15px;
-        font-weight: 300;
-        margin-left: 12px;
-        padding: 0 11px 0 13px;
-        text-overflow: ellipsis;
-        width: 300px;
-      }
-
-      #pac-input:focus {
-        border-color: #4d90fe;
-      }
-
-      .pac-container {
-        font-family: Roboto;
-      }
-
-      #type-selector {
-        color: #fff;
-        background-color: #4d90fe;
-        padding: 5px 11px 0px 11px;
-      }
-
-      #type-selector label {
-        font-family: Roboto;
-        font-size: 13px;
-        font-weight: 300;
-      }
-      #target {
-        width: 345px;
-      }
-      .largeField {
-        width: 85%;
-      }
-      table {
-        width: 85%;
-      }
-    </style>
-  </head>
-  <body>
-    <div >
-        <span>JSON:</span>
-        <div id="json">click JSON button to see JSON</div>
-        <button onclick="postForm(); return false;">JSON</button>
-    </div>
-    <div>
-    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
-    <div id="map"></div>
-    <br>
-    <form id="theForm" class="form-horizontal"  onsubmit="return false;">
-    <table >
-        <tr>
-            <td colspan="2"><!-- address -->
-            <span >
-                <label for="formatted_address">Postal Address</label>
-            </span>
-            <input   type="text"  class="form-control" id="formatted_address" name="formatted_address">
-            </td>
-        </tr>
-        <tr>
-            <!-- phone -->
-            <td>
-            <span>
-                <label for="formatted_phone_number">Phone Number</label>
-            </span>
-            <input   type="phone" class="form-control" id="formatted_phone_number" name="formatted_phone_number">
-            </td><td>
-            <!-- <span>
-                <label for="info_url">URL</label>
-            </span> -->
-            <a href="#" id="info_url" name="info_url"></a>
-            </td>
-        </tr>
-        <tr>
-            <td>
-            <div>
-                <label for="location_lat">Lat</label>
-                <input  type="text" class="form-control" id="location_lat" name="location_lat">
-            </div>
-        </td><td>
-            <div>
-                <label for="location_lng">Lng</label>
-                <input  type="text" class="form-control" id="location_lng" name="location_lng">
-            </div>
-        </td>
-        </tr>
-        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr>
-        <td colspan="2">
-            <div class="well well-large text-center">
-                <label for="cage_number">Cage Number</label>
-                <input  type="number" class="form-control" id="cage_number" name="cage_number">
-            </div> 
-        </td>
-            
-        </tr>
-    </table>
-         
-    </form>
-    </div><!-- end results div -->
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-   
-   <!-- common code -->
-   <script>    /*
+    /*
  * Searchbox functionality
  * Usage:
  * call initAutocomplete from google api link i.e.
@@ -156,43 +12,13 @@
  * TODO
  */
 var addressData = {};
-var _defaultLatLon = {lat: -33.8688, lng: 151.2195};
-
-/**
- * args['lat'],args['lng'] - lat lon to center map on
- * args['callback'] the call back passed in
- */
-function initializeSearchbox(args) {
-        var lat=_defaultLatLon.lat
-        ,lng=_defaultLatLon.lng
-        ,callback=fillInAddress;
-        if (args !== undefined) {
-
-          if ( "lng" in args) {
-              lng = args['lng'];
-          }
-          if ("lat" in args) {
-              lat = args['lat'];
-          }
-          
-          if ("callback" in args) {
-            callback = args["callback"];
-          }
-        }
-        
+function initAutocomplete() {
         var map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: lat, lng: lng},
+          center: {lat: -33.8688, lng: 151.2195},
           zoom: 13,
           mapTypeId: 'roadmap'
           , types: 'establishment'
         });
-        
-        init(map, callback);
-}
-
-
-function init(map, callback) {
-        
 
         // Create the search box and link it to the UI element.
         var input = document.getElementById('pac-input');
@@ -222,7 +48,7 @@ function init(map, callback) {
           if (places.length == 1) {
             // TODO: Could be an ATM, need consistent filtering
             // use fetch, gets more info only if needed
-            fetchPlaceAddress(places[0], service, callback);
+            fetchPlaceAddress(places[0], service, fillInAddress);
           }
           
           // Clear out the old markers.
@@ -278,7 +104,7 @@ function init(map, callback) {
                 });
                 markers.push(marker);
                 var p = place;
-                marker.addListener('click', clickHandlerForPlace(p, service, callback));
+                marker.addListener('click', clickHandlerForPlace(p, service, fillInAddress));
                 
                 // calculate new view bounds
                 if (place.geometry.viewport) {
@@ -407,10 +233,6 @@ function init(map, callback) {
       
     /*
      * Fetch place details and execute callback
-     * using the places API service
-     * p - place with or without address components
-     * service - places API
-     * callback - after storing info, do what user wants
      */
     function  fetchPlaceAddress(p, service, callback){
         // DEBUG: checking out what types we get back..
@@ -446,8 +268,7 @@ function init(map, callback) {
     }
     /*
      * Returns a click event handler for use with
-     * fetching place details - fetches when clicked,
-     * and then fetch place calls the callback
+     * fetching place details
      */
     function clickHandlerForPlace(p, service, callback){
         return function(event) {
@@ -455,59 +276,10 @@ function init(map, callback) {
         }
     }
     
-    /**
-     * Returns JSON dict of address data.
-     * Possible fields are:
-     * TODO
-     * args - Optional list or string corresponding
-     * to the desired key value pairs
-     * i.e. ["formatted_address","formatted_phone_number"]
-     * if you don't want any other info
-     * Otherwise the dict will have all available
-     * place/address fields
-     * recorded in addressData
-     */
-    function getAddressData(args) {
-        if (args == null) {
-          return addressData;
-        } else {
-          var d = {}; 
-          if (typeof args == 'string') {
-            d[args] = addressData[args];
-          }
-          else if (typeof args == 'list') {
-            for (var i in args){
-                d[i] = addressData[i];
-            }
-          }
-          return d;
-        }
+    function getAddressData() {
+        return addressData;
     }
-
-    function clearAddressData(){
+      
+    function clearAddressFormData(){
         addressData = {};    
     }
-   </script>
-<!-- Code to init our handlers
-Here we could do beforeAjax when ready(), and so on
-But we just need to fill in the form
-and show the JSON
--->
-    <script>
-      /**
-       * initialize
-       */
-      function initAutocomplete(){
-        initializeSearchbox();
-      }
-      /**
-       * Send form and address data
-       */
-        function  postForm(){
-          $("#json").text(JSON.stringify(getAddressData()));
-        }
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWNNCsmSfb0gpZv3IuK1c91cctc2y6FYY&libraries=places&amp;callback=initAutocomplete"
-     async defer></script>
-    </body>
-</html>
