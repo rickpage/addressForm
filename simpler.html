@@ -477,6 +477,7 @@ function init(map, callback) {
     /**
      * Returns JSON dict of address data.
      * Possible fields are:
+     * formatted_address
      * TODO
      * args - Optional list or string corresponding
      * to the desired key value pairs
@@ -490,13 +491,16 @@ function init(map, callback) {
         if (args == null) {
           return addressData;
         } else {
-          var d = {}; 
+          var e,d = {};
+          // String
           if (typeof args == 'string') {
             d[args] = addressData[args];
           }
-          else if (typeof args == 'list') {
+          // Array
+          else if (typeof args == 'object') {
             for (var i in args){
-                d[i] = addressData[i];
+              e=args[i];
+                d[e] = addressData[e];
             }
           }
           return d;
@@ -513,17 +517,23 @@ But we just need to fill in the form
 and show the JSON
 -->
     <script>
+      // if we only wanted to show a few fields, we can pass
+      // a list to getAddressData
+      // var keys = ['formatted_address','link'];
+      var keys = null;
+      var args =
+      {lat:40.7127,lng:-74.0059};
       /**
        * initialize
        */
       function initAutocomplete(){
-        initializeSearchbox();
+        initializeSearchbox(args);
       }
       /**
        * Send form and address data
        */
         function  postForm(){
-          $("#json").text(JSON.stringify(getAddressData()));
+          $("#json").text(JSON.stringify(getAddressData(keys)));
         }
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWNNCsmSfb0gpZv3IuK1c91cctc2y6FYY&libraries=places&amp;callback=initAutocomplete"

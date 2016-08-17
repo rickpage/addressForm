@@ -31,8 +31,14 @@ var addressData = {};
 var _defaultLatLon = {lat: -33.8688, lng: 151.2195};
 
 /**
+ * provide a dict of args to control
+ * starting lat lng
  * args['lat'],args['lng'] - lat lon to center map on
+ *
+ * callback on user selecting place on map/searchbox
  * args['callback'] the call back passed in
+ *
+ * TODO
  */
 function initializeSearchbox(args) {
         var lat=_defaultLatLon.lat
