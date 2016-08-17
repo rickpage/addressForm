@@ -1,4 +1,4 @@
-     /*
+    /*
  * Searchbox functionality
  * Usage:
  * call initAutocomplete from google api link i.e.
@@ -280,3 +280,6 @@ function initAutocomplete() {
         return addressData;
     }
       
+    function clearAddressFormData(){
+        addressData = {};    
+    }
