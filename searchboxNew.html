@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Places Searchbox</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 55%;
+      }
+      .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      .pac-container {
+        font-family: Roboto;
+      }
+
+      #type-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        padding: 5px 11px 0px 11px;
+      }
+
+      #type-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+      #target {
+        width: 345px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+        <p>Search for an 'establishment' using the input box on the map,
+        and anything matching will be shown as an icon the map. Clicking
+        on an icon will populate the address form. The form is then
+        converted to JSON (to be submitted to an API, etc).
+        </p>
+        <span><button onclick="goJSON();">JSON</button></span>
+        <pre style="background-color: #DDD;" id="json">
+            
+
+        </pre>
+        <form id="theForm" onsubmit="return false;">
+   
+    <!-- <div id="autocompleteWrapper">
+        <label for="autocomplete"><b>Required:</b>&nbsp;Search for Customer Address </label>
+        <input type="text" id="autocomplete" name="user_address_input" style="width: 100%">
+        <p style="font-size: small">Note: in the future, Customer or Business Name may be able to auto-fill everything except BULK/EXCHANGE, and Parent Company</p>
+    </div> -->
+    </tr>
+    </table>
+    <div id="results" style="">
+        <!-- ReSULTS TABLE -->
+        <table>
+            <tr>
+                <td colspan="2"><!-- road -->
+                <span>
+                    <label for="formatted_address">Postal Address</label>
+                </span>
+               
+                <span>
+                    <input disabled="" type="text" class="numberField" id="formatted_address" name="formatted_address"/>
+                </span>
+            <!-- --></td>
+                <td colspan="2">
+                <span>
+                    <label for="formatted_phone_number">Phone Number</label>
+                </span>
+                <span>
+                    <input type="text" class="largeField" id="formatted_phone_number" name="formatted_phone_number"/>
+                </span>
+            </td>
+        </tr>
+            
+            <tr>
+                <td><!-- road -->
+                <span>
+                    <label for="street_number">Street Address</label>
+                </span>
+                </td><td>
+                <span>
+                    <input disabled="" type="text" class="numberField" id="street_number" name="street_number"/>
+                </span>
+            <!-- --></td><td colspan="2">
+                <span>
+                    <input disabled="" type="text" class="largeField" id="route" name="route"/>
+                </span>
+            </td>
+        </tr>
+        
+        
+        <tr><!-- city, state, zip -->
+        <td colspan="2">
+            <span >
+                <label for="locality">City</label>
+                <input disabled="" type="text" class="medField" id="locality" name="locality">
+            </span>
+        </td><td>
+            <span>
+                <label for="administrative_area_level_1">State</label>
+                <input disabled="" type="text" class="smallField" id="administrative_area_level_1" name="administrative_area_level_1">
+            </span>
+        </td><td>
+            <span>
+                <label for="postal_code">Zip Code</label>
+                <input disabled="" type="text" class="medField" id="postal_code" name="postal_code">
+            </span>
+        </td>
+        </tr><tr>
+        <td colspan="2">
+        <!-- county; lat, lng from geometry-->
+            <span>
+               <label for="administrative_area_level_2">County</label>
+                <input disabled="" type="text" class="medField" id="administrative_area_level_2" name="administrative_area_level_2">
+            </span>
+        </td><td>
+            <span>
+                <label for="location_lat">Lat</label>
+                <input disabled="" type="text" class="smallField" id="location_lat" name="location_lat">
+            </span>
+        </td><td>
+            <span>
+                <label for="location_lng">Lng</label>
+                <input disabled="" type="text" class="smallField" id="location_lng" name="location_lng">
+            </span>
+        </td>
+        </tr>
+    </table>
+         </div><!-- end results div -->
+
+    </form>
+    </div>
+      <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://rawgit.com/rickpage/addressForm/master/js/searchbox.js"></script>
+
+    <script>
+        function goJSON(args) {  var j = $("#theForm").serialize();$("#json").text(j);}
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWNNCsmSfb0gpZv3IuK1c91cctc2y6FYY&libraries=places&amp;callback=initAutocomplete"
+         async defer></script>
+  </body>
+</html>
